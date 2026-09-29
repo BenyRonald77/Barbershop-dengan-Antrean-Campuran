@@ -1,4 +1,4 @@
-# DESIGN.md — Arah Desain Barbershop dengan Antrean Campuran
+# DESIGN.md: Arah Desain Barbershop dengan Antrean Campuran
 
 Catatan jujur: arah desain di bawah ini ditulis oleh pembuat aplikasi (bukan dari pemilik usaha), untuk kebutuhan alat operasional internal toko. Ini bukan brief dari pemilik barbershop asli, jadi anggap ini sebagai draf arah desain kerja, bukan identitas merek final yang sudah disetujui pemilik usaha.
 
