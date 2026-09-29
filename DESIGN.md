@@ -21,7 +21,7 @@ Maksimal 2-3 warna inti + 1 aksen (di luar warna netral), sesuai batas palet:
 Warna status fungsional (bukan bagian dari palet dekoratif, tapi kebutuhan legibilitas data, tetap desaturasi supaya tidak menambah "jumlah warna" di layar):
 - Menunggu: abu-netral `#9C8D7D` pada badge outline.
 - Dipanggil: aksen tembaga `#C9822F` (menandakan sedang aktif/perlu perhatian).
-- Selesai: hijau lumut redup `#5C7A52` (bukan hijau neon), menandakan status selesai secara jujur tanpa menambah kegembiraan visual yang tidak perlu.
+- Selesai: hijau lumut redup `#6B8C60` (bukan hijau neon), menandakan status selesai secara jujur tanpa menambah kegembiraan visual yang tidak perlu. Nilai ini dipilih setelah pengecekan kontras WCAG AA terhadap teks gelap di atasnya, bukan sekadar hijau pertama yang terlihat cocok.
 - Batal / Tidak Hadir: merah bata redup `#8C4B42`, dibedakan dari oxblood inti supaya tidak tertukar dengan warna nav.
 
 Latar terang dipakai pada halaman publik (booking dan cek status) memakai kartu krem gading `#F3ECE2` di atas charcoal, bukan seluruh halaman putih, supaya tetap satu keluarga warna dengan sisi kasir.
