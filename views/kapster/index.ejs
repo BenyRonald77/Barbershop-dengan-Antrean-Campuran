@@ -1,0 +1,67 @@
+<%- include('../partials/header', { title }) %>
+<div class="page-header">
+  <h1>Kapster</h1>
+  <p>Kelola daftar kapster yang melayani pelanggan. Kapster yang dinonaktifkan tidak akan muncul sebagai pilihan di halaman booking dan walk-in.</p>
+</div>
+
+<div class="grid grid-2" style="align-items: start;">
+  <div class="card">
+    <h2>Tambah Kapster</h2>
+    <form method="post" action="/kapster">
+      <div class="field">
+        <label for="kode">Kode antrean</label>
+        <input type="text" id="kode" name="kode" maxlength="4" placeholder="Contoh: A" required>
+        <span class="hint">Dipakai sebagai awalan nomor antrean, misal A-01, A-02.</span>
+      </div>
+      <div class="field">
+        <label for="nama">Nama kapster</label>
+        <input type="text" id="nama" name="nama" placeholder="Contoh: Budi" required>
+      </div>
+      <button class="btn btn-primary btn-block" type="submit">Tambah Kapster</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>Daftar Kapster</h2>
+    <% if (daftarKapster.length === 0) { %>
+      <div class="empty-state">
+        <h3>Belum ada kapster</h3>
+        <p>Tambahkan kapster pertama lewat form di sebelah supaya antrean bisa mulai dibuat.</p>
+      </div>
+    <% } else { %>
+      <div class="stack">
+        <% daftarKapster.forEach(function(k) { %>
+          <div class="antrean-item">
+            <div class="antrean-item-top">
+              <span class="antrean-nomor"><%= k.kode %> &middot; <%= k.nama %></span>
+              <span class="badge <%= k.aktif ? 'badge-selesai' : 'badge-batal' %>">
+                <%= k.aktif ? 'Aktif' : 'Nonaktif' %>
+              </span>
+            </div>
+            <details style="margin-top:0.6rem;">
+              <summary class="muted" style="cursor:pointer;">Ubah data</summary>
+              <form method="post" action="/kapster/<%= k.id %>/update" style="margin-top:0.6rem;">
+                <div class="field">
+                  <label for="kode-<%= k.id %>">Kode antrean</label>
+                  <input type="text" id="kode-<%= k.id %>" name="kode" maxlength="4" value="<%= k.kode %>" required>
+                </div>
+                <div class="field">
+                  <label for="nama-<%= k.id %>">Nama kapster</label>
+                  <input type="text" id="nama-<%= k.id %>" name="nama" value="<%= k.nama %>" required>
+                </div>
+                <button class="btn btn-secondary" type="submit">Simpan Perubahan</button>
+              </form>
+            </details>
+            <form method="post" action="/kapster/<%= k.id %>/toggle" class="actions">
+              <button class="btn <%= k.aktif ? 'btn-danger' : 'btn-secondary' %>" type="submit">
+                <%= k.aktif ? 'Nonaktifkan' : 'Aktifkan' %>
+              </button>
+            </form>
+          </div>
+        <% }); %>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

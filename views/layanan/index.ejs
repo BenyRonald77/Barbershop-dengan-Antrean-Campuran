@@ -1,0 +1,84 @@
+<%- include('../partials/header', { title }) %>
+<div class="page-header">
+  <h1>Layanan</h1>
+  <p>Kelola daftar layanan beserta durasi dan harga. Durasi dipakai untuk menghitung estimasi waktu tunggu di antrean.</p>
+</div>
+
+<div class="grid grid-2" style="align-items: start;">
+  <div class="card">
+    <h2>Tambah Layanan</h2>
+    <form method="post" action="/layanan">
+      <div class="field">
+        <label for="nama">Nama layanan</label>
+        <input type="text" id="nama" name="nama" placeholder="Contoh: Potong Rambut" required>
+      </div>
+      <div class="field">
+        <label for="durasi_menit">Durasi (menit)</label>
+        <input type="text" id="durasi_menit" name="durasi_menit" inputmode="numeric" placeholder="Contoh: 30" required>
+      </div>
+      <div class="field">
+        <label for="harga">Harga (Rupiah)</label>
+        <input type="text" id="harga" name="harga" inputmode="numeric" placeholder="Contoh: 35000" required>
+      </div>
+      <button class="btn btn-primary btn-block" type="submit">Tambah Layanan</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>Daftar Layanan</h2>
+    <% if (daftarLayanan.length === 0) { %>
+      <div class="empty-state">
+        <h3>Belum ada layanan</h3>
+        <p>Tambahkan layanan pertama lewat form di sebelah, misalnya Potong Rambut atau Cukur Jenggot.</p>
+      </div>
+    <% } else { %>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nama</th>
+              <th>Durasi</th>
+              <th>Harga</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% daftarLayanan.forEach(function(l) { %>
+              <tr>
+                <td><%= l.nama %></td>
+                <td><%= l.durasi_menit %> menit</td>
+                <td><%= 'Rp' + Number(l.harga).toLocaleString('id-ID') %></td>
+                <td>
+                  <details>
+                    <summary class="muted" style="cursor:pointer;">Ubah</summary>
+                    <form method="post" action="/layanan/<%= l.id %>/update" style="margin-top:0.5rem; min-width:220px;">
+                      <div class="field">
+                        <label for="nama-<%= l.id %>">Nama</label>
+                        <input type="text" id="nama-<%= l.id %>" name="nama" value="<%= l.nama %>" required>
+                      </div>
+                      <div class="field">
+                        <label for="durasi-<%= l.id %>">Durasi (menit)</label>
+                        <input type="text" id="durasi-<%= l.id %>" name="durasi_menit" inputmode="numeric" value="<%= l.durasi_menit %>" required>
+                      </div>
+                      <div class="field">
+                        <label for="harga-<%= l.id %>">Harga</label>
+                        <input type="text" id="harga-<%= l.id %>" name="harga" inputmode="numeric" value="<%= l.harga %>" required>
+                      </div>
+                      <button class="btn btn-secondary" type="submit">Simpan</button>
+                    </form>
+                    <form method="post" action="/layanan/<%= l.id %>/delete" style="margin-top:0.5rem;"
+                      onsubmit="return confirm('Hapus layanan ini?');">
+                      <button class="btn btn-danger" type="submit">Hapus</button>
+                    </form>
+                  </details>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

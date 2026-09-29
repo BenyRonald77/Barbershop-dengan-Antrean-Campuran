@@ -1,6 +1,8 @@
 const path = require('path');
 const express = require('express');
 const db = require('./db');
+const kapsterRouter = require('./routes/kapster');
+const layananRouter = require('./routes/layanan');
 
 const app = express();
 
@@ -21,6 +23,9 @@ app.use((req, res, next) => {
 app.get('/', (req, res) => {
   res.render('dashboard', { title: 'Dashboard' });
 });
+
+app.use('/kapster', kapsterRouter);
+app.use('/layanan', layananRouter);
 
 app.use((req, res) => {
   res.status(404).render('404', { title: 'Halaman Tidak Ditemukan' });
