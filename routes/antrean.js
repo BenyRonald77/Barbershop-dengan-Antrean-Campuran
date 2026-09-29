@@ -109,4 +109,64 @@ router.post('/:id/tidak-hadir', (req, res) => {
   }
 });
 
+// Membuat tautan wa.me berisi pesan giliran dan mencatat waktu pengiriman.
+// Ini bukan pengiriman otomatis: kasir sendiri yang menekan kirim di WhatsApp
+// setelah tautan terbuka (lihat PRD, bagian notifikasi WhatsApp).
+router.post('/:id/notify', (req, res) => {
+  const antrean = queue.getAntreanById(db, req.params.id);
+  if (!antrean) return res.redirect('/antrean?error=' + encodeURIComponent('Antrean tidak ditemukan.'));
+  if (!antrean.no_hp) {
+    return res.redirect('/antrean?error=' + encodeURIComponent('Antrean ini tidak punya nomor HP.'));
+  }
+  try {
+    const pesan = queue.buatPesanWhatsapp(db, antrean);
+    const nomorWa = queue.nomorHpKeWa(antrean.no_hp);
+    queue.catatNotifikasiTerkirim(db, antrean.id);
+    const linkWa = `https://wa.me/${nomorWa}?text=${encodeURIComponent(pesan)}`;
+    res.redirect(linkWa);
+  } catch (err) {
+    res.redirect('/antrean?error=' + encodeURIComponent(err.message));
+  }
+});
+
+router.get('/cek', (req, res) => {
+  const { no_hp, nomor } = req.query;
+  let hasil = [];
+  const sudahCari = Boolean(no_hp || nomor);
+  if (sudahCari) {
+    hasil = queue.cariAntreanUntukCek(db, { noHp: no_hp, nomorAntre: nomor }).map((a) => {
+      const kapster = db.prepare('SELECT * FROM kapster WHERE id = ?').get(a.kapster_id);
+      return {
+        ...a,
+        kapster_nama: kapster ? kapster.nama : '-',
+        estimasi_menit: queue.estimasiTungguMenit(db, a),
+        posisi: queue.posisiTunggu(db, a),
+        hampir_tiba: queue.giliranHampirTiba(db, a),
+        layanan: queue.getLayananUntukAntrean(db, a.id)
+      };
+    });
+  }
+  res.render('antrean/cek', {
+    title: 'Cek Status Antrean',
+    hasil,
+    sudahCari,
+    queryNoHp: no_hp || '',
+    queryNomor: nomor || ''
+  });
+});
+
+// Data JSON ringkas dipakai halaman cek status untuk polling setiap ~10 detik.
+router.get('/cek/data.json', (req, res) => {
+  const { no_hp, nomor } = req.query;
+  const hasil = queue.cariAntreanUntukCek(db, { noHp: no_hp, nomorAntre: nomor }).map((a) => ({
+    id: a.id,
+    nomor_antre: a.nomor_antre,
+    status: a.status,
+    estimasi_menit: queue.estimasiTungguMenit(db, a),
+    posisi: queue.posisiTunggu(db, a),
+    hampir_tiba: queue.giliranHampirTiba(db, a)
+  }));
+  res.json({ hasil, waktuServer: new Date().toISOString() });
+});
+
 module.exports = router;

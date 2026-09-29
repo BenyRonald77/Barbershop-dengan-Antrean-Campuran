@@ -1,0 +1,65 @@
+<%- include('../partials/header', { title }) %>
+<div class="page-header">
+  <h1>Cek Status Antrean</h1>
+  <p>Masukkan nomor HP atau nomor antrean yang Anda terima saat booking atau walk-in. Halaman ini memperbarui diri sendiri setiap sekitar 10 detik.</p>
+</div>
+
+<div class="card-light" style="max-width:520px;">
+  <form method="get" action="/antrean/cek" class="stack">
+    <div class="field">
+      <label for="ck-nomor">Nomor antrean</label>
+      <input type="text" id="ck-nomor" name="nomor" placeholder="Contoh: A-01" value="<%= queryNomor %>">
+    </div>
+    <p class="muted text-center" style="margin:0;">atau</p>
+    <div class="field">
+      <label for="ck-hp">Nomor HP</label>
+      <input type="tel" id="ck-hp" name="no_hp" placeholder="08xxxxxxxxxx" value="<%= queryNoHp %>">
+    </div>
+    <button class="btn btn-primary btn-block" type="submit">Cek Status</button>
+  </form>
+</div>
+
+<% if (sudahCari) { %>
+  <div style="margin-top:1.5rem;" data-cek-query="<%= queryNoHp ? 'no_hp=' + encodeURIComponent(queryNoHp) : 'nomor=' + encodeURIComponent(queryNomor) %>">
+    <% if (hasil.length === 0) { %>
+      <div class="card">
+        <div class="empty-state">
+          <h3>Tidak ditemukan</h3>
+          <p>Tidak ada antrean hari ini yang cocok dengan data tersebut. Periksa kembali nomor HP atau nomor antrean Anda.</p>
+        </div>
+      </div>
+    <% } else { %>
+      <% hasil.forEach(function(a) { %>
+        <div class="card" data-cek-id="<%= a.id %>">
+          <div data-cek-banner style="<%= a.hampir_tiba ? '' : 'display:none;' %>">
+            <div class="banner-hampir-tiba">Giliran Anda sudah dekat, silakan bersiap menuju barbershop.</div>
+          </div>
+          <div class="section-title">
+            <h2><%= a.nomor_antre %></h2>
+            <span class="badge badge-<%= a.status %>" data-cek-status>
+              <%= a.status === 'menunggu' ? 'Menunggu' : (a.status === 'dipanggil' ? 'Dipanggil' : (a.status === 'selesai' ? 'Selesai' : (a.status === 'batal' ? 'Batal' : 'Tidak Hadir'))) %>
+            </span>
+          </div>
+          <p class="muted">Kapster: <%= a.kapster_nama %> &middot; <%= a.tipe === 'booking' ? 'Booking' : 'Walk-in' %></p>
+          <p><strong>Layanan:</strong> <%= a.layanan.map(function(l){ return l.layanan_nama; }).join(', ') %></p>
+
+          <% if (a.status === 'menunggu') { %>
+            <p><strong>Posisi menunggu:</strong> <span data-cek-posisi>ke-<%= a.posisi %></span></p>
+            <p><strong>Estimasi tunggu:</strong> sekitar <span data-cek-estimasi><%= a.estimasi_menit %></span> menit</p>
+          <% } else if (a.status === 'dipanggil') { %>
+            <p>Sedang dilayani sekarang. Silakan menuju kursi kapster.</p>
+          <% } else if (a.status === 'selesai') { %>
+            <p>Layanan sudah selesai. Terima kasih sudah datang.</p>
+          <% } else if (a.status === 'batal') { %>
+            <p>Antrean ini sudah dibatalkan.</p>
+          <% } else { %>
+            <p>Antrean ini ditandai tidak hadir saat dipanggil.</p>
+          <% } %>
+        </div>
+      <% }); %>
+    <% } %>
+  </div>
+<% } %>
+
+<script src="/js/cek-poll.js"></script>
+<%- include('../partials/footer') %>
