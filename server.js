@@ -3,6 +3,8 @@ const express = require('express');
 const db = require('./db');
 const kapsterRouter = require('./routes/kapster');
 const layananRouter = require('./routes/layanan');
+const antreanRouter = require('./routes/antrean');
+const bookingRouter = require('./routes/booking');
 
 const app = express();
 
@@ -26,6 +28,8 @@ app.get('/', (req, res) => {
 
 app.use('/kapster', kapsterRouter);
 app.use('/layanan', layananRouter);
+app.use('/antrean', antreanRouter);
+app.use('/booking', bookingRouter);
 
 app.use((req, res) => {
   res.status(404).render('404', { title: 'Halaman Tidak Ditemukan' });

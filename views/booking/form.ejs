@@ -1,0 +1,60 @@
+<%- include('../partials/header', { title }) %>
+<div class="page-header">
+  <h1>Booking Online</h1>
+  <p>Pilih kapster dan layanan, lalu dapatkan nomor antrean beserta estimasi waktu tunggu. Antrean booking dan walk-in digabung dalam satu urutan per kapster.</p>
+</div>
+
+<% var input = typeof inputSebelumnya !== 'undefined' ? inputSebelumnya : {}; %>
+<% var inputLayanan = input.layanan_id ? (Array.isArray(input.layanan_id) ? input.layanan_id : [input.layanan_id]) : []; %>
+
+<div class="card-light" style="max-width:560px;">
+  <% if (typeof pesanError !== 'undefined' && pesanError) { %>
+    <div class="flash flash-error" role="alert" style="color:#1c1916;"><%= pesanError %></div>
+  <% } %>
+
+  <% if (daftarKapster.length === 0 || daftarLayanan.length === 0) { %>
+    <div class="empty-state">
+      <h3>Booking belum tersedia</h3>
+      <p>Toko belum mengatur kapster atau layanan aktif. Silakan hubungi toko langsung untuk saat ini.</p>
+    </div>
+  <% } else { %>
+    <form method="post" action="/booking">
+      <div class="field">
+        <label for="bk-kapster">Kapster</label>
+        <select id="bk-kapster" name="kapster_id" required>
+          <% daftarKapster.forEach(function(k) { %>
+            <option value="<%= k.id %>" <%= String(input.kapster_id) === String(k.id) ? 'selected' : '' %>>
+              <%= k.kode %> &middot; <%= k.nama %>
+            </option>
+          <% }); %>
+        </select>
+      </div>
+      <div class="field">
+        <label for="bk-nama">Nama Anda</label>
+        <input type="text" id="bk-nama" name="nama_pelanggan" value="<%= input.nama_pelanggan || '' %>" required>
+      </div>
+      <div class="field">
+        <label for="bk-hp">Nomor HP (untuk info giliran)</label>
+        <input type="tel" id="bk-hp" name="no_hp" value="<%= input.no_hp || '' %>" placeholder="08xxxxxxxxxx" required>
+      </div>
+      <div class="field">
+        <label>Layanan</label>
+        <div class="checkbox-list">
+          <% daftarLayanan.forEach(function(l) { %>
+            <label class="checkbox-item">
+              <input type="checkbox" name="layanan_id" value="<%= l.id %>" <%= inputLayanan.indexOf(String(l.id)) !== -1 ? 'checked' : '' %>>
+              <span class="layanan-info">
+                <span><%= l.nama %></span>
+                <span class="muted"><%= l.durasi_menit %> menit, Rp<%= Number(l.harga).toLocaleString('id-ID') %></span>
+              </span>
+            </label>
+          <% }); %>
+        </div>
+        <span class="hint">Bisa pilih lebih dari satu layanan.</span>
+      </div>
+      <button class="btn btn-primary btn-block" type="submit">Booking Sekarang</button>
+    </form>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

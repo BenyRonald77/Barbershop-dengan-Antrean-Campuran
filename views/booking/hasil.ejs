@@ -1,0 +1,26 @@
+<%- include('../partials/header', { title }) %>
+<div class="page-header">
+  <h1>Booking Berhasil</h1>
+</div>
+
+<div class="card-light" style="max-width:520px;">
+  <p class="muted" style="text-transform:uppercase; letter-spacing:0.03em; font-size:0.8rem;">Nomor Antrean Anda</p>
+  <h2 style="font-size:2.2rem; margin-bottom:0.25rem;"><%= antrean.nomor_antre %></h2>
+  <p class="muted">Kapster: <%= antrean.kapster_nama %></p>
+
+  <div style="margin:1.25rem 0;">
+    <p><strong>Layanan:</strong> <%= layanan.map(function(l){ return l.layanan_nama; }).join(', ') %></p>
+    <p><strong>Total durasi:</strong> <%= antrean.total_durasi_menit %> menit</p>
+    <p><strong>Posisi menunggu:</strong> ke-<%= posisi %></p>
+    <p><strong>Estimasi tunggu saat ini:</strong> sekitar <%= estimasiMenit %> menit</p>
+  </div>
+
+  <p class="muted">Simpan nomor antrean dan nomor HP Anda. Anda bisa memantau posisi antrean secara langsung di halaman Cek Status.</p>
+
+  <div class="actions">
+    <a class="btn btn-primary" href="/antrean/cek?nomor=<%= encodeURIComponent(antrean.nomor_antre) %>">Cek Status Antrean Ini</a>
+    <a class="btn btn-secondary" href="/booking">Booking Lagi</a>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

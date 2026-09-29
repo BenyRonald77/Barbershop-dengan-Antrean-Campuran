@@ -1,0 +1,155 @@
+<%- include('../partials/header', { title }) %>
+<div class="page-header">
+  <h1>Papan Antrean</h1>
+  <p>Booking online dan walk-in tergabung dalam satu antrean per kapster, urut sesuai waktu masuk. Halaman ini memperbarui estimasi waktu tunggu otomatis setiap sekitar 10 detik.</p>
+</div>
+
+<div class="card">
+  <h2>Tambah Walk-in</h2>
+  <% if (daftarKapster.length === 0 || daftarLayanan.length === 0) { %>
+    <div class="empty-state">
+      <h3>Belum bisa menambah walk-in</h3>
+      <p>
+        <% if (daftarKapster.length === 0) { %>Tambahkan kapster aktif dulu di halaman <a href="/kapster">Kapster</a>.<% } %>
+        <% if (daftarLayanan.length === 0) { %> Tambahkan layanan dulu di halaman <a href="/layanan">Layanan</a>.<% } %>
+      </p>
+    </div>
+  <% } else { %>
+    <form method="post" action="/antrean/walkin">
+      <div class="grid grid-2">
+        <div class="field">
+          <label for="wk-kapster">Kapster</label>
+          <select id="wk-kapster" name="kapster_id" required>
+            <% daftarKapster.forEach(function(k) { %>
+              <option value="<%= k.id %>"><%= k.kode %> &middot; <%= k.nama %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="field">
+          <label for="wk-nama">Nama pelanggan</label>
+          <input type="text" id="wk-nama" name="nama_pelanggan" required>
+        </div>
+      </div>
+      <div class="field">
+        <label for="wk-hp">Nomor HP (opsional, untuk notifikasi giliran)</label>
+        <input type="tel" id="wk-hp" name="no_hp" placeholder="08xxxxxxxxxx">
+      </div>
+      <div class="field">
+        <label>Layanan</label>
+        <div class="checkbox-list">
+          <% daftarLayanan.forEach(function(l) { %>
+            <label class="checkbox-item">
+              <input type="checkbox" name="layanan_id" value="<%= l.id %>">
+              <span class="layanan-info">
+                <span><%= l.nama %></span>
+                <span class="muted"><%= l.durasi_menit %> menit</span>
+              </span>
+            </label>
+          <% }); %>
+        </div>
+      </div>
+      <button class="btn btn-primary" type="submit">Tambah ke Antrean</button>
+    </form>
+  <% } %>
+</div>
+
+<% if (papan.length === 0) { %>
+  <div class="card">
+    <div class="empty-state">
+      <h3>Belum ada kapster</h3>
+      <p>Tambahkan kapster di halaman <a href="/kapster">Kapster</a> supaya papan antrean bisa terisi.</p>
+    </div>
+  </div>
+<% } else { %>
+  <div class="grid grid-kapster">
+    <% papan.forEach(function(p) { %>
+      <div class="card" data-kapster-id="<%= p.kapster.id %>">
+        <div class="section-title">
+          <h2><%= p.kapster.kode %> &middot; <%= p.kapster.nama %></h2>
+          <span class="badge <%= p.kapster.aktif ? 'badge-selesai' : 'badge-batal' %>">
+            <%= p.kapster.aktif ? 'Aktif' : 'Nonaktif' %>
+          </span>
+        </div>
+
+        <% var sedangDilayani = p.antreanAktif.find(function(a) { return a.status === 'dipanggil'; }); %>
+        <% var daftarMenunggu = p.antreanAktif.filter(function(a) { return a.status === 'menunggu'; }); %>
+
+        <% if (sedangDilayani) { %>
+          <div class="sedang-dilayani">
+            <div class="antrean-item-top">
+              <span class="antrean-nomor"><%= sedangDilayani.nomor_antre %> &middot; <%= sedangDilayani.nama_pelanggan %></span>
+              <span class="badge badge-tipe"><%= sedangDilayani.tipe === 'booking' ? 'Booking' : 'Walk-in' %></span>
+            </div>
+            <div class="antrean-layanan-list">
+              <%= sedangDilayani.layanan.map(function(l) { return l.layanan_nama; }).join(', ') %>
+              (<%= sedangDilayani.total_durasi_menit %> menit)
+            </div>
+            <div class="actions">
+              <form method="post" action="/antrean/<%= sedangDilayani.id %>/selesai" class="inline-form">
+                <button class="btn btn-primary" type="submit">Selesai</button>
+              </form>
+              <form method="post" action="/antrean/<%= sedangDilayani.id %>/tidak-hadir" class="inline-form">
+                <button class="btn btn-danger" type="submit">Tidak Hadir</button>
+              </form>
+            </div>
+          </div>
+        <% } else if (daftarMenunggu.length > 0) { %>
+          <form method="post" action="/antrean/<%= daftarMenunggu[0].id %>/panggil">
+            <button class="btn btn-primary btn-block" type="submit">Panggil Berikutnya</button>
+          </form>
+        <% } else { %>
+          <p class="muted">Tidak ada pelanggan yang sedang dilayani.</p>
+        <% } %>
+
+        <h3 style="margin-top:1rem; font-size:0.95rem;">Menunggu (<%= daftarMenunggu.length %>)</h3>
+        <% if (daftarMenunggu.length === 0) { %>
+          <p class="muted">Tidak ada antrean menunggu untuk kapster ini.</p>
+        <% } else { %>
+          <div class="stack" data-antrean-list>
+            <% daftarMenunggu.forEach(function(a, idx) { %>
+              <div class="antrean-item" data-antrean-id="<%= a.id %>">
+                <div class="antrean-item-top">
+                  <span class="antrean-nomor">#<%= idx + 1 %> &middot; <%= a.nomor_antre %> &middot; <%= a.nama_pelanggan %></span>
+                  <span class="badge badge-tipe"><%= a.tipe === 'booking' ? 'Booking' : 'Walk-in' %></span>
+                </div>
+                <div class="antrean-layanan-list">
+                  <%= a.layanan.map(function(l) { return l.layanan_nama; }).join(', ') %>
+                  (<%= a.total_durasi_menit %> menit)
+                </div>
+                <div class="antrean-meta">
+                  Estimasi tunggu: <span data-estimasi><%= a.estimasi_menit %></span> menit
+                </div>
+                <div class="actions">
+                  <form method="post" action="/antrean/<%= a.id %>/batal" class="inline-form">
+                    <button class="btn btn-secondary" type="submit">Batal</button>
+                  </form>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        <% } %>
+
+        <% if (p.antreanSelesai.length > 0) { %>
+          <details style="margin-top:1rem;">
+            <summary class="muted" style="cursor:pointer;">Riwayat hari ini (<%= p.antreanSelesai.length %>)</summary>
+            <div class="stack" style="margin-top:0.5rem;">
+              <% p.antreanSelesai.forEach(function(a) { %>
+                <div class="antrean-item">
+                  <div class="antrean-item-top">
+                    <span class="antrean-nomor"><%= a.nomor_antre %> &middot; <%= a.nama_pelanggan %></span>
+                    <span class="badge badge-<%= a.status %>">
+                      <%= a.status === 'selesai' ? 'Selesai' : (a.status === 'batal' ? 'Batal' : 'Tidak Hadir') %>
+                    </span>
+                  </div>
+                </div>
+              <% }); %>
+            </div>
+          </details>
+        <% } %>
+      </div>
+    <% }); %>
+  </div>
+<% } %>
+
+<script src="/js/board-poll.js"></script>
+<%- include('../partials/footer') %>
