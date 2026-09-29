@@ -1,6 +1,7 @@
 const path = require('path');
 const express = require('express');
 const db = require('./db');
+const dashboardRouter = require('./routes/dashboard');
 const kapsterRouter = require('./routes/kapster');
 const layananRouter = require('./routes/layanan');
 const antreanRouter = require('./routes/antrean');
@@ -22,10 +23,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/', (req, res) => {
-  res.render('dashboard', { title: 'Dashboard' });
-});
-
+app.use('/', dashboardRouter);
 app.use('/kapster', kapsterRouter);
 app.use('/layanan', layananRouter);
 app.use('/antrean', antreanRouter);

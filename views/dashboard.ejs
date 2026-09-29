@@ -1,6 +1,66 @@
 <%- include('partials/header', { title }) %>
 <div class="page-header">
   <h1>Dashboard</h1>
-  <p>Ringkasan antrean hari ini akan tampil di sini.</p>
+  <p>Ringkasan antrean hari ini (<%= tanggalHariIni %>) untuk setiap kapster.</p>
 </div>
+
+<% if (ringkasan.length === 0) { %>
+  <div class="card">
+    <div class="empty-state">
+      <h3>Belum ada kapster</h3>
+      <p>Tambahkan kapster di halaman <a href="/kapster">Kapster</a> untuk mulai melihat ringkasan antrean harian.</p>
+    </div>
+  </div>
+<% } else { %>
+  <div class="grid grid-kapster">
+    <% ringkasan.forEach(function(r) { %>
+      <div class="card">
+        <div class="section-title">
+          <h2><%= r.kapster.kode %> &middot; <%= r.kapster.nama %></h2>
+          <span class="badge <%= r.kapster.aktif ? 'badge-selesai' : 'badge-batal' %>">
+            <%= r.kapster.aktif ? 'Aktif' : 'Nonaktif' %>
+          </span>
+        </div>
+
+        <% if (r.totalHariIni === 0) { %>
+          <p class="muted">Belum ada antrean untuk kapster ini hari ini.</p>
+        <% } else { %>
+          <div class="ringkasan-grid">
+            <div class="ringkasan-stat">
+              <span class="angka"><%= r.hitung.menunggu %></span>
+              <span class="label">Menunggu</span>
+            </div>
+            <div class="ringkasan-stat">
+              <span class="angka"><%= r.hitung.dipanggil %></span>
+              <span class="label">Dipanggil</span>
+            </div>
+            <div class="ringkasan-stat">
+              <span class="angka"><%= r.hitung.selesai %></span>
+              <span class="label">Selesai</span>
+            </div>
+            <div class="ringkasan-stat">
+              <span class="angka"><%= r.hitung.batal + r.hitung.tidak_hadir %></span>
+              <span class="label">Batal/Tidak Hadir</span>
+            </div>
+          </div>
+        <% } %>
+
+        <% if (r.sedangDilayani) { %>
+          <div class="sedang-dilayani">
+            <p class="muted" style="margin-bottom:0.2rem; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.03em;">Sedang Dilayani</p>
+            <p style="margin:0; font-weight:600;"><%= r.sedangDilayani.nomor_antre %> &middot; <%= r.sedangDilayani.nama_pelanggan %></p>
+            <p class="muted" style="margin:0.2rem 0 0;">
+              <%= r.layananSedangDilayani.map(function(l){ return l.layanan_nama; }).join(', ') %>
+            </p>
+          </div>
+        <% } %>
+
+        <div class="actions">
+          <a class="btn btn-secondary" href="/antrean">Buka Papan Antrean</a>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+<% } %>
+
 <%- include('partials/footer') %>
